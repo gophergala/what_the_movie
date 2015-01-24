@@ -34,15 +34,8 @@ func processFrames(frames chan *cv.IplImage) {
 		C.cvConvertScale(unsafe.Pointer(img), unsafe.Pointer(img32), 1, 0)
 		cv.CvtColor(img32, img32, C.CV_BGR2HSV)
 
-		img32.SetCOI(1)
-		cv.Copy(img32, img1c, nil)
-		img32.ResetROI()
-		C.cvCalcHist((**C.IplImage)(unsafe.Pointer(&img1c)), histH, 0, nil)
-
-		img32.SetCOI(2)
-		cv.Copy(img32, img1c, nil)
-		img32.ResetROI()
-		C.cvCalcHist((**C.IplImage)(unsafe.Pointer(&img1c)), histS, 0, nil)
+		calculateHistogram(img32, img1c, histH, 1)
+		calculateHistogram(img32, img1c, histS, 2)
 
 		img.Release()
 	}
@@ -50,5 +43,7 @@ func processFrames(frames chan *cv.IplImage) {
 	if nil != img32 {
 		img32.Release()
 		img1c.Release()
+		C.cvReleaseHist(&histH)
+		C.cvReleaseHist(&histS)
 	}
 }
