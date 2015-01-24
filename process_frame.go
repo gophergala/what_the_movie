@@ -1,4 +1,5 @@
 package main
+
 /*
 #cgo linux  pkg-config: opencv
 #cgo darwin pkg-config: opencv
@@ -19,7 +20,7 @@ var (
 )
 
 func processFrames(frames chan *cv.IplImage) {
-	
+
 	var img32, img1c *cv.IplImage
 	var histH, histS *C.CvHistogram
 
@@ -27,8 +28,8 @@ func processFrames(frames chan *cv.IplImage) {
 		if nil == img32 {
 			img32 = cv.CreateImage(cv.GetSizeWidth(img), cv.GetSizeHeight(img), cv.IPL_DEPTH_32F, 3)
 			img1c = cv.CreateImage(cv.GetSizeWidth(img), cv.GetSizeHeight(img), cv.IPL_DEPTH_32F, 1)
-			histH = C.cvCreateHist(1, (*C.int)(unsafe.Pointer(&buckets)), C.CV_HIST_ARRAY, (**C.float)(unsafe.Pointer(&rangeH)), 1);
-			histS = C.cvCreateHist(1, (*C.int)(unsafe.Pointer(&buckets)), C.CV_HIST_ARRAY, (**C.float)(unsafe.Pointer(&rangeS)), 1);
+			histH = C.cvCreateHist(1, (*C.int)(unsafe.Pointer(&buckets)), C.CV_HIST_ARRAY, (**C.float)(unsafe.Pointer(&rangeH)), 1)
+			histS = C.cvCreateHist(1, (*C.int)(unsafe.Pointer(&buckets)), C.CV_HIST_ARRAY, (**C.float)(unsafe.Pointer(&rangeS)), 1)
 		}
 
 		C.cvConvertScale(unsafe.Pointer(img), unsafe.Pointer(img32), 1, 0)

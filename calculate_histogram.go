@@ -1,4 +1,5 @@
 package main
+
 /*
 #cgo linux  pkg-config: opencv
 #cgo darwin pkg-config: opencv
@@ -13,8 +14,8 @@ import (
 )
 
 func calculateHistogram(img, img1c *cv.IplImage, hist *C.CvHistogram, coi int) {
-		img.SetCOI(coi)
-		cv.Copy(img, img1c, nil)
-		img.ResetROI()
-		C.cvCalcHist((**C.IplImage)(unsafe.Pointer(&img1c)), hist, 0, nil)
+	img.SetCOI(coi)
+	cv.Copy(img, img1c, nil)
+	img.ResetROI()
+	C.cvCalcHist((**C.IplImage)(unsafe.Pointer(&img1c)), hist, 0, nil)
 }
