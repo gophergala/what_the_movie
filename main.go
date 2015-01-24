@@ -11,13 +11,12 @@ import (
 const N_THREADS = 10
 
 func main() {
-	filename := "../data/???.avi"
-	if len(os.Args) == 2 {
-		filename = os.Args[1]
-	} else {
-		fmt.Printf("Usage: go run player.go videoname\n")
+	if len(os.Args) != 2 {
+		fmt.Printf("Usage: go run %s videoname\n", os.Args[0])
 		os.Exit(0)
 	}
+
+	filename := os.Args[1]
 
 	cap := cv.NewFileCapture(filename)
 	if cap == nil {
@@ -25,15 +24,12 @@ func main() {
 	}
 	defer cap.Release()
 
-	exitCh  := make(chan struct{})
-	frameCh := make(chan *cv.IplImage, N_THREADS)
+	exitCh   := make(chan struct{})
+	framesCh := make(chan *cv.IplImage, N_THREADS)
 
 	for i:=0; i<N_THREADS; i++ {
 		go func() {
-			for img := range frameCh {
-				cv.CvtColor(img, img, 40)
-				img.Release()
-			}
+			processFrames(framesCh)
 			exitCh <- struct{}{}
 		}()
 	}
@@ -46,14 +42,14 @@ func main() {
 		if img == nil {
 			break
 		}
-		frameCh <- img.Clone()
+		framesCh <- img.Clone()
 		fmt.Printf("frame: %d in %d ms.\n", i, time.Now().Sub(now) / time.Millisecond)
 
 		if 100 == i {
 			break
 		}
 	}
-	close(frameCh)
+	close(framesCh)
 
 	for i:=0; i<N_THREADS; i++ {
 		<- exitCh
