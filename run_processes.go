@@ -1,11 +1,11 @@
 package main
 
 import (
-	`net/http`
+	log `github.com/cihub/seelog`
 	`github.com/gorilla/mux`
 	mgo `gopkg.in/mgo.v2`
 	`gopkg.in/mgo.v2/bson`
-	log `github.com/cihub/seelog`
+	`net/http`
 	`time`
 )
 

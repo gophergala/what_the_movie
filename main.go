@@ -1,13 +1,13 @@
 package main
 
 import (
-	`os`
-	mgo `gopkg.in/mgo.v2`
 	log `github.com/cihub/seelog`
+	mgo `gopkg.in/mgo.v2`
+	`os`
 )
 
 const (
-	JOBS_COLLECTION = `jobs`
+	JOBS_COLLECTION   = `jobs`
 	FRAMES_COLLECTION = `frames`
 	MOVIES_COLLECTION = `movies`
 )
@@ -29,5 +29,5 @@ func main() {
 	log.Infof(`Connected!`)
 	runProcesses(mgoSession, os.Args[2])
 
-	<- (chan struct{})(nil)
+	<-(chan struct{})(nil)
 }

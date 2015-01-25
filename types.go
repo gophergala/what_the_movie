@@ -32,7 +32,7 @@ type Histograms struct {
 }
 
 type Frame struct {
-	Image   *cv.IplImage   `bson:"-"`
+	Image    *cv.IplImage  `bson:"-"`
 	PosFrame int           `bson:"nframe"`
 	PosMs    int           `bson:"ms"`
 	Movie    bson.ObjectId `bson:"movie"`

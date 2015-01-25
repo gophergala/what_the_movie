@@ -15,11 +15,11 @@ import (
 func copyHistogram(hist *C.CvHistogram) Histogram {
 	values := (*cv.Mat)(hist.bins)
 
-	ret := Histogram {
+	ret := Histogram{
 		Bins: make([]float64, values.Rows()),
 	}
 
-	for j:=0; j<len(ret.Bins); j++ {
+	for j := 0; j < len(ret.Bins); j++ {
 		ret.Bins[j] = values.Get(j, 0)
 	}
 

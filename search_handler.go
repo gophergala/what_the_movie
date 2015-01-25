@@ -1,4 +1,5 @@
 package main
+
 /*
 #cgo linux  pkg-config: opencv
 #cgo darwin pkg-config: opencv
@@ -8,17 +9,17 @@ package main
 import "C"
 
 import (
+	`fmt`
 	cv `github.com/hybridgroup/go-opencv/opencv`
-	`net/http`
 	mgo `gopkg.in/mgo.v2`
 	`gopkg.in/mgo.v2/bson`
-	`fmt`
 	`io/ioutil`
+	`net/http`
 	`unsafe`
 )
 
 const (
-	RANGE = 50
+	RANGE     = 50
 	THRESHOLD = 0.9
 )
 
@@ -26,13 +27,13 @@ func searchHandler(dbConn *mgo.Session, dbName string) func(http.ResponseWriter,
 	return func(writer http.ResponseWriter, req *http.Request) {
 		photoFile, _, err := req.FormFile(`photo`)
 		if nil != err {
-      http.Error(writer, `Missing file.`, http.StatusBadRequest)
+			http.Error(writer, `Missing file.`, http.StatusBadRequest)
 			return
 		}
 
 		fileData, err := ioutil.ReadAll(photoFile)
 		if nil != err {
-      http.Error(writer, `Invalid file.`, http.StatusBadRequest)
+			http.Error(writer, `Invalid file.`, http.StatusBadRequest)
 			return
 		}
 
@@ -40,16 +41,16 @@ func searchHandler(dbConn *mgo.Session, dbName string) func(http.ResponseWriter,
 		ioutil.WriteFile(tmpFile.Name(), fileData, 0660)
 		img := cv.LoadImage(tmpFile.Name(), cv.CV_LOAD_IMAGE_COLOR)
 		if nil == img {
-      http.Error(writer, `Invalid file.`, http.StatusBadRequest)
+			http.Error(writer, `Invalid file.`, http.StatusBadRequest)
 			return
 		}
 		defer img.Release()
 
-		img32   := cv.CreateImage(cv.GetSizeWidth(img), cv.GetSizeHeight(img), cv.IPL_DEPTH_32F, 3)
-		img1c   := cv.CreateImage(cv.GetSizeWidth(img), cv.GetSizeHeight(img), cv.IPL_DEPTH_32F, 1)
+		img32 := cv.CreateImage(cv.GetSizeWidth(img), cv.GetSizeHeight(img), cv.IPL_DEPTH_32F, 3)
+		img1c := cv.CreateImage(cv.GetSizeWidth(img), cv.GetSizeHeight(img), cv.IPL_DEPTH_32F, 1)
 		buckets := BUCKETS
-		histH   := C.cvCreateHist(1, (*C.int)(unsafe.Pointer(&buckets)), C.CV_HIST_ARRAY, (**C.float)(unsafe.Pointer(&rangeH)), 1)
-		histS   := C.cvCreateHist(1, (*C.int)(unsafe.Pointer(&buckets)), C.CV_HIST_ARRAY, (**C.float)(unsafe.Pointer(&rangeS)), 1)
+		histH := C.cvCreateHist(1, (*C.int)(unsafe.Pointer(&buckets)), C.CV_HIST_ARRAY, (**C.float)(unsafe.Pointer(&rangeH)), 1)
+		histS := C.cvCreateHist(1, (*C.int)(unsafe.Pointer(&buckets)), C.CV_HIST_ARRAY, (**C.float)(unsafe.Pointer(&rangeS)), 1)
 
 		histCmpH := C.cvCreateHist(1, (*C.int)(unsafe.Pointer(&buckets)), C.CV_HIST_ARRAY, (**C.float)(unsafe.Pointer(&rangeH)), 1)
 		histCmpS := C.cvCreateHist(1, (*C.int)(unsafe.Pointer(&buckets)), C.CV_HIST_ARRAY, (**C.float)(unsafe.Pointer(&rangeS)), 1)
@@ -62,10 +63,10 @@ func searchHandler(dbConn *mgo.Session, dbName string) func(http.ResponseWriter,
 		calculateHistogram(img32, img1c, histH, 1)
 		calculateHistogram(img32, img1c, histS, 2)
 
-		query := bson.M {
-			`rgb.r`: bson.M{`$gt`: float64(r-RANGE), `$lt`: float64(r+RANGE)},
-			`rgb.g`: bson.M{`$gt`: float64(g-RANGE), `$lt`: float64(g+RANGE)},
-			`rgb.b`: bson.M{`$gt`: float64(b-RANGE), `$lt`: float64(b+RANGE)},
+		query := bson.M{
+			`rgb.r`: bson.M{`$gt`: float64(r - RANGE), `$lt`: float64(r + RANGE)},
+			`rgb.g`: bson.M{`$gt`: float64(g - RANGE), `$lt`: float64(g + RANGE)},
+			`rgb.b`: bson.M{`$gt`: float64(b - RANGE), `$lt`: float64(b + RANGE)},
 		}
 		iter := dbConn.DB(dbName).C(FRAMES_COLLECTION).Find(query).Iter()
 		defer iter.Close()
@@ -84,7 +85,7 @@ func searchHandler(dbConn *mgo.Session, dbName string) func(http.ResponseWriter,
 			}
 			v2 := C.cvCompareHist(histH, histCmpH, C.CV_COMP_CHISQR)
 
-			mean := (v1+v2)/2.
+			mean := (v1 + v2) / 2.
 			if mean > THRESHOLD {
 				var movie Movie
 				dbConn.DB(dbName).C(MOVIES_COLLECTION).FindId(frame.Movie).One(&movie)
