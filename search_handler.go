@@ -90,7 +90,7 @@ func searchHandler(dbConn *mgo.Session, dbName string) func(http.ResponseWriter,
 				var movie Movie
 				dbConn.DB(dbName).C(MOVIES_COLLECTION).FindId(frame.Movie).One(&movie)
 				fmt.Fprintf(writer, `Your image belongs to film "%s".`, movie.Name)
-				break
+				return
 			}
 		}
 
