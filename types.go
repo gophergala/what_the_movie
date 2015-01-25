@@ -2,15 +2,18 @@ package main
 
 import (
 	cv `github.com/hybridgroup/go-opencv/opencv`
+	`gopkg.in/mgo.v2/bson`
 )
 
 type MovieProcessJob struct {
-	Path string `bson:"path"`
-	Name string `bson:"name"`
+	Id   bson.ObjectId `bson:"_id"`
+	Path string        `bson:"path"`
+	Name string        `bson:"name"`
 }
 
 type Movie struct {
-	Name string `bson:"name"`
+	Id   bson.ObjectId `bson:"_id"`
+	Name string        `bson:"name"`
 }
 
 type RGB struct {
@@ -29,10 +32,10 @@ type Histograms struct {
 }
 
 type Frame struct {
-	Image   *cv.IplImage `bson:"-"`
-	PosFrame int         `bson:"nframe"`
-	PosMs    int         `bson:"ms"`
-	Movie    Movie       `bson:"movie"`
-	Rgb      RGB         `bson:"rgb"`
-	Hists    Histograms  `bson:"hists"`
+	Image   *cv.IplImage   `bson:"-"`
+	PosFrame int           `bson:"nframe"`
+	PosMs    int           `bson:"ms"`
+	Movie    bson.ObjectId `bson:"movie"`
+	Rgb      RGB           `bson:"rgb"`
+	Hists    Histograms    `bson:"hists"`
 }

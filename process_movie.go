@@ -4,13 +4,16 @@ import (
 	`fmt`
 	cv `github.com/hybridgroup/go-opencv/opencv`
 	`time`
+	`gopkg.in/mgo.v2`
+	`gopkg.in/mgo.v2/bson`
+	log `github.com/cihub/seelog`
 )
 
 const (
 	FRAME_SKIP = 5
 )
 
-func processMovies(movies chan MovieProcessJob, framesCh chan Frame) {
+func processMovies(movies chan MovieProcessJob, framesCh chan Frame, dbConn *mgo.Session, dbName string) {
 	for movieJob := range movies {
 		cap := cv.NewFileCapture(movieJob.Path)
 		if cap == nil {
@@ -21,9 +24,11 @@ func processMovies(movies chan MovieProcessJob, framesCh chan Frame) {
 		start  := time.Now()
 		frames := int(cap.GetProperty(cv.CV_CAP_PROP_FRAME_COUNT))
 		movie  := Movie {
+			Id:   bson.NewObjectId(),
 			Name: movieJob.Name,
 		}
-		for i := 0; i < frames; i++ {
+		dbConn.DB(dbName).C(MOVIES_COLLECTION).Insert(movie)
+		for i := 0; i < frames/25; i++ {
 			img := cap.QueryFrame()
 			if img == nil {
 				break
@@ -35,7 +40,7 @@ func processMovies(movies chan MovieProcessJob, framesCh chan Frame) {
 				Image: img.Clone(),
 				PosFrame: i,
 				PosMs: int(cap.GetProperty(cv.CV_CAP_PROP_POS_MSEC)),
-				Movie: movie,
+				Movie: movie.Id,
 			}
 
 			// Skip N-1 frames
@@ -43,6 +48,10 @@ func processMovies(movies chan MovieProcessJob, framesCh chan Frame) {
 				cap.GrabFrame()
 				i++
 			}
+		}
+		err := dbConn.DB(dbName).C(JOBS_COLLECTION).UpdateId(movieJob.Id, bson.M{`$set`: bson.M{`processed`: true}})
+		if nil != err {
+			log.Errorf(`Error updating document %s: %v`, movieJob.Id.Hex(), err)
 		}
 		cap.Release()
 	}

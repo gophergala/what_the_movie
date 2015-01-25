@@ -10,6 +10,7 @@ import "C"
 
 import (
 	cv `github.com/hybridgroup/go-opencv/opencv`
+	mgo `gopkg.in/mgo.v2`
 	`unsafe`
 )
 
@@ -21,7 +22,7 @@ var (
 	rangeRGB = []float32{0, 255}
 )
 
-func processFrames(frames chan Frame) {
+func processFrames(frames chan Frame, dbConn *mgo.Session, dbName string) {
 	var img32, img1c *cv.IplImage
 	var histH, histS *C.CvHistogram
 
@@ -61,6 +62,8 @@ func processFrames(frames chan Frame) {
 
 		frame.Hists.H = copyHistogram(histH)
 		frame.Hists.S = copyHistogram(histS)
+
+		dbConn.DB(dbName).C(FRAMES_COLLECTION).Insert(frame)
 	}
 
 	if nil != img32 {
