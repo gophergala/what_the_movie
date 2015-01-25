@@ -36,17 +36,7 @@ func processFrames(frames chan Frame, dbConn *mgo.Session, dbName string) {
 			histS  = C.cvCreateHist(1, (*C.int)(unsafe.Pointer(&buckets)), C.CV_HIST_ARRAY, (**C.float)(unsafe.Pointer(&rangeS)), 1)
 		}
 
-		sum := C.cvSum(unsafe.Pointer(img)).val
-		sumVal := (float64(sum[0])+float64(sum[1])+float64(sum[2]))/100.
-
-		r, g, b := .0, .0, .0
-		if sumVal < 0.1 {
-			r, g, b = 1./3., 1./3., 1./3.
-		} else {
-			r = float64(sum[2])/sumVal
-			g = float64(sum[1])/sumVal
-			b = float64(sum[0])/sumVal
-		}
+		r, g, b := calculatePixelSum(img)
 
 		C.cvConvertScale(unsafe.Pointer(img), unsafe.Pointer(img32), 1, 0)
 		cv.CvtColor(img32, img32, C.CV_BGR2HSV)
