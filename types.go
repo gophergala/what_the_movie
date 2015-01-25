@@ -4,6 +4,10 @@ import (
 	cv `github.com/hybridgroup/go-opencv/opencv`
 )
 
+type MovieProcessJob struct {
+	Path string `bson:"path"`
+	Name string `bson:"name"`
+}
 
 type Movie struct {
 	Name string `bson:"name"`
