@@ -11,7 +11,6 @@ import "C"
 import (
 	cv `github.com/hybridgroup/go-opencv/opencv`
 	`unsafe`
-	`math`
 )
 
 const BUCKETS = 32
@@ -21,20 +20,6 @@ var (
 	rangeS   = []float32{0, 255}
 	rangeRGB = []float32{0, 255}
 )
-
-func copyHistogram(hist *C.CvHistogram) Histogram {
-	values := (*cv.Mat)(hist.bins)
-
-	ret := Histogram {
-		Bins: make([]float64, values.Rows()),
-	}
-
-	for j:=0; j<len(ret.Bins); j++ {
-		ret.Bins[j] = values.Get(j, 0)
-	}
-
-	return ret
-}
 
 func processFrames(frames chan Frame) {
 	var img32, img1c *cv.IplImage
@@ -51,16 +36,15 @@ func processFrames(frames chan Frame) {
 		}
 
 		sum := C.cvSum(unsafe.Pointer(img)).val
-		max := math.Max(float64(sum[0]), float64(sum[1]))
-		max  = math.Max(max, float64(sum[2]))
+		sumVal := (float64(sum[0])+float64(sum[1])+float64(sum[2]))/100.
 
 		r, g, b := .0, .0, .0
-		if max < 0.1 {
+		if sumVal < 0.1 {
 			r, g, b = 1./3., 1./3., 1./3.
 		} else {
-			r = float64(sum[2])/max
-			g = float64(sum[1])/max
-			b = float64(sum[0])/max
+			r = float64(sum[2])/sumVal
+			g = float64(sum[1])/sumVal
+			b = float64(sum[0])/sumVal
 		}
 
 		C.cvConvertScale(unsafe.Pointer(img), unsafe.Pointer(img32), 1, 0)
