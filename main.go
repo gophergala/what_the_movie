@@ -3,14 +3,10 @@ package main
 import (
 	`os`
 	mgo `gopkg.in/mgo.v2`
-	`gopkg.in/mgo.v2/bson`
 	log `github.com/cihub/seelog`
-	`time`
 )
 
 const (
-	N_FRAME_THREADS = 10
-	N_MOVIE_THREADS = 5
 	JOBS_COLLECTION = `jobs`
 	FRAMES_COLLECTION = `frames`
 	MOVIES_COLLECTION = `movies`
@@ -30,34 +26,8 @@ func main() {
 		log.Errorf(`Error connecting to MongoDB: %v.`, err)
 		return
 	}
-
 	log.Infof(`Connected!`)
-	dbConn := mgoSession.DB(os.Args[2])
+	runProcesses(mgoSession, os.Args[2])
 
-	moviesCh := make(chan MovieProcessJob, N_MOVIE_THREADS)
-	framesCh := make(chan Frame, N_FRAME_THREADS)
-	defer close(moviesCh)
-	defer close(framesCh)
-
-	for i := 0; i < N_MOVIE_THREADS; i++ {
-		go processMovies(moviesCh, framesCh, mgoSession.Copy(), os.Args[2])
-	}
-	for i := 0; i < N_FRAME_THREADS; i++ {
-		go processFrames(framesCh, mgoSession.Copy(), os.Args[2])
-	}
-
-	for {
-		log.Infof(`Querying...`)
-		jobsColl := dbConn.C(JOBS_COLLECTION)
-		jobsIter := jobsColl.Find(bson.M{`processed`: false}).Tail(-1)
-		var movieJob MovieProcessJob
-		for jobsIter.Next(&movieJob) {
-			moviesCh <- movieJob
-		}
-		if err := jobsIter.Err(); nil != err {
-			log.Errorf(`Error: %v.`, err)
-		}
-		jobsIter.Close()
-		time.Sleep(time.Second)
-	}
+	<- (chan struct{})(nil)
 }
