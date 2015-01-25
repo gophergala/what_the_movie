@@ -18,4 +18,5 @@ func calculateHistogram(img, img1c *cv.IplImage, hist *C.CvHistogram, coi int) {
 	cv.Copy(img, img1c, nil)
 	img.ResetROI()
 	C.cvCalcHist((**C.IplImage)(unsafe.Pointer(&img1c)), hist, 0, nil)
+	C.cvNormalizeHist(hist, 1)
 }

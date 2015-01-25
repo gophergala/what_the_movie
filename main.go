@@ -25,7 +25,7 @@ func main() {
 	defer cap.Release()
 
 	exitCh := make(chan struct{})
-	framesCh := make(chan *cv.IplImage, N_THREADS)
+	framesCh := make(chan Frame, N_THREADS)
 
 	for i := 0; i < N_THREADS; i++ {
 		go func() {
@@ -35,6 +35,7 @@ func main() {
 	}
 
 	now := time.Now()
+	movie := Movie{Name: `test`}
 	frames := int(cap.GetProperty(cv.CV_CAP_PROP_FRAME_COUNT))
 	for i := 0; i < frames; i++ {
 		now := time.Now()
@@ -42,10 +43,16 @@ func main() {
 		if img == nil {
 			break
 		}
-		framesCh <- img.Clone()
+
+		framesCh <- Frame {
+			Image: img.Clone(),
+			PosFrame: i,
+			PosMs: int(cap.GetProperty(cv.CV_CAP_PROP_POS_MSEC)),
+			Movie: movie,
+		}
 		fmt.Printf("frame: %d in %d ms.\n", i, time.Now().Sub(now)/time.Millisecond)
 
-		if 100 == i {
+		if 50 == i {
 			break
 		}
 	}
