@@ -9,6 +9,7 @@ import (
 )
 
 const N_THREADS = 10
+const FRAME_SKIP = 5
 
 func main() {
 	if len(os.Args) != 2 {
@@ -52,8 +53,10 @@ func main() {
 		}
 		fmt.Printf("frame: %d in %d ms.\n", i, time.Now().Sub(now)/time.Millisecond)
 
-		if 50 == i {
-			break
+		// Skip N-1 frames
+		for j:=1; j<FRAME_SKIP; j++ {
+			cap.GrabFrame()
+			i++
 		}
 	}
 	close(framesCh)

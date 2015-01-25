@@ -23,8 +23,21 @@ var (
 	rangeRGB = []float32{0, 255}
 )
 
-func processFrames(frames chan Frame) {
+func copyHistogram(hist *C.CvHistogram) Histogram {
+	values := (*cv.Mat)(hist.bins)
 
+	ret := Histogram {
+		Bins: make([]float64, values.Rows()),
+	}
+
+	for j:=0; j<len(ret.Bins); j++ {
+		ret.Bins[j] = values.Get(j, 0)
+	}
+
+	return ret
+}
+
+func processFrames(frames chan Frame) {
 	var img32, img1c *cv.IplImage
 	var histH, histS *C.CvHistogram
 
@@ -59,6 +72,13 @@ func processFrames(frames chan Frame) {
 		calculateHistogram(img32, img1c, histS, 2)
 
 		img.Release()
+
+		frame.Rgb.R = r
+		frame.Rgb.G = g
+		frame.Rgb.B = b
+
+		frame.Hists.H = copyHistogram(histH)
+		frame.Hists.S = copyHistogram(histS)
 	}
 
 	if nil != img32 {
