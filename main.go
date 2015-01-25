@@ -35,15 +35,16 @@ func main() {
 		}()
 	}
 
-	now := time.Now()
+	start := time.Now()
 	movie := Movie{Name: `test`}
 	frames := int(cap.GetProperty(cv.CV_CAP_PROP_FRAME_COUNT))
 	for i := 0; i < frames; i++ {
-		now := time.Now()
 		img := cap.QueryFrame()
 		if img == nil {
 			break
 		}
+
+		fmt.Printf("Processing frame %d (%.2f%%). %.2f fps.\n", i, float32(i)*100./float32(frames), (float32(i*1e9))/float32(time.Now().Sub(start).Nanoseconds()))
 
 		framesCh <- Frame {
 			Image: img.Clone(),
@@ -51,7 +52,6 @@ func main() {
 			PosMs: int(cap.GetProperty(cv.CV_CAP_PROP_POS_MSEC)),
 			Movie: movie,
 		}
-		fmt.Printf("frame: %d in %d ms.\n", i, time.Now().Sub(now)/time.Millisecond)
 
 		// Skip N-1 frames
 		for j:=1; j<FRAME_SKIP; j++ {
@@ -64,5 +64,5 @@ func main() {
 	for i := 0; i < N_THREADS; i++ {
 		<-exitCh
 	}
-	fmt.Printf("all frames: %d ms.\n", time.Now().Sub(now)/time.Millisecond)
+	fmt.Printf("All frames: %.2f s.\n", time.Now().Sub(start)/time.Second)
 }

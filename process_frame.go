@@ -11,7 +11,6 @@ import "C"
 import (
 	cv `github.com/hybridgroup/go-opencv/opencv`
 	`unsafe`
-	`fmt`
 	`math`
 )
 
@@ -65,7 +64,6 @@ func processFrames(frames chan Frame) {
 		}
 
 		C.cvConvertScale(unsafe.Pointer(img), unsafe.Pointer(img32), 1, 0)
-		fmt.Printf("rgb: (%.2f, %.2f, %.2f)\n", r, g, b)
 		cv.CvtColor(img32, img32, C.CV_BGR2HSV)
 
 		calculateHistogram(img32, img1c, histH, 1)
